@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { CardContent, CardHeader } from "@/components/ui/card";
+import { CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pin, Expand, X, ArrowUp, Loader2, Minus, FileText, Image as ImageIcon, Link as LinkIcon, ListChecks } from "lucide-react";
@@ -107,8 +107,8 @@ export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, 
     }
 
     return (
-      <Tabs defaultValue="answer" className="flex flex-col flex-grow">
-        <TabsList className="mx-4 mt-2 bg-transparent p-0 border-b border-white/10 rounded-none justify-start gap-4">
+      <Tabs defaultValue="answer" className="flex flex-col flex-grow h-full">
+        <TabsList className="mx-4 mt-2 bg-transparent p-0 border-b border-white/10 rounded-none justify-start gap-4 flex-shrink-0">
           <TabsTrigger value="answer" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-white rounded-none px-2 text-muted-foreground"><FileText className="mr-2" /> Answer</TabsTrigger>
           {panelData.images && panelData.images.length > 0 && <TabsTrigger value="images" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-white rounded-none px-2 text-muted-foreground"><ImageIcon className="mr-2" /> Images</TabsTrigger>}
           {panelData.sources && panelData.sources.length > 0 && <TabsTrigger value="sources" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-white rounded-none px-2 text-muted-foreground"><LinkIcon className="mr-2" /> Sources</TabsTrigger>}
@@ -175,7 +175,7 @@ export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, 
     >
       <div className="flex-grow rounded-xl border border-primary/30 bg-neutral-900/60 backdrop-blur-xl flex flex-col overflow-hidden">
         <CardHeader
-          className="flex-row items-center justify-between p-3 border-b cursor-grab"
+          className="flex-row items-center justify-between p-3 border-b cursor-grab flex-shrink-0"
           onMouseDown={handleMouseDownDrag}
         >
           <p className="font-code text-xs font-medium truncate select-none">{panelData.query}</p>
@@ -188,9 +188,11 @@ export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, 
         </CardHeader>
         
         <div className="flex flex-col flex-grow min-h-0">
-            {renderContent()}
+            <div className="flex-grow overflow-y-auto">
+              {renderContent()}
+            </div>
 
-            <div className="p-3 border-t mt-auto">
+            <div className="p-3 border-t flex-shrink-0">
                 <form onSubmit={handleFollowUpSubmit} className="relative">
                     <Input
                         type="text"
