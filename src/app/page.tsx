@@ -6,6 +6,7 @@ import { ConversationStarters } from "@/components/conversation-starters";
 import { KnowledgePanel } from "@/components/knowledge-panel";
 import React, { useState, useEffect } from "react";
 import { generateConciseSummary } from "@/ai/flows/generate-concise-summary";
+import { MinimizedPanel } from "@/components/minimized-panel";
 
 export interface PanelData {
   id: string;
@@ -14,6 +15,7 @@ export interface PanelData {
   position: { x: number; y: number };
   size: { width: number; height: number };
   zIndex: number;
+  isMinimized: boolean;
 }
 
 export default function Home() {
@@ -49,6 +51,7 @@ export default function Home() {
       position: { x: window.innerWidth / 2 - 275 + (Math.random() - 0.5) * 100, y: window.innerHeight / 2 - 300 + (Math.random() - 0.5) * 100 },
       size: { width: 550, height: 600 },
       zIndex: maxZ + 1,
+      isMinimized: false,
     };
     setPanels(prev => [...prev, newPanelPlaceholder]);
 
@@ -64,6 +67,21 @@ export default function Home() {
   const closePanel = (id: string) => {
     setPanels(panels.filter(p => p.id !== id));
   };
+
+  const toggleMinimizePanel = (id: string) => {
+    setPanels(prev => prev.map(p => {
+      if (p.id === id) {
+        const isMinimized = !p.isMinimized;
+        if (!isMinimized) {
+          // If we are restoring the panel, bring it to front.
+          const maxZ = Math.max(...prev.map(p => p.zIndex));
+          return { ...p, isMinimized: false, zIndex: maxZ + 1 };
+        }
+        return { ...p, isMinimized: true };
+      }
+      return p;
+    }));
+  };
   
   const updatePanelPosition = (id: string, position: { x: number; y: number }) => {
     setPanels(prev => prev.map(p => p.id === id ? { ...p, position } : p));
@@ -72,6 +90,9 @@ export default function Home() {
   const updatePanelSize = (id: string, size: { width: number; height: number }) => {
     setPanels(prev => prev.map(p => p.id === id ? { ...p, size } : p));
   };
+  
+  const minimizedPanels = panels.filter(p => p.isMinimized);
+  const openPanels = panels.filter(p => !p.isMinimized);
 
   return (
     <main className="h-screen w-screen overflow-hidden bg-background">
@@ -99,7 +120,7 @@ export default function Home() {
       </div>
       
       <div className="absolute inset-0 pl-20 pointer-events-none">
-        {isClient && panels.map(panel => (
+        {isClient && openPanels.map(panel => (
           <div key={panel.id} className="pointer-events-auto">
             <KnowledgePanel
               panelData={panel}
@@ -107,10 +128,19 @@ export default function Home() {
               onFocus={bringToFront}
               onPositionChange={updatePanelPosition}
               onSizeChange={updatePanelSize}
+              onToggleMinimize={toggleMinimizePanel}
             />
           </div>
         ))}
       </div>
+      
+      {minimizedPanels.length > 0 && (
+        <div className="absolute bottom-0 left-20 right-0 h-16 bg-black/10 backdrop-blur-md p-2 flex items-center gap-2 overflow-x-auto z-50">
+          {minimizedPanels.map(panel => (
+            <MinimizedPanel key={panel.id} panelData={panel} onRestore={() => toggleMinimizePanel(panel.id)} />
+          ))}
+        </div>
+      )}
     </main>
   );
 }

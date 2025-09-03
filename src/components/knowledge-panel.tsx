@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pin, Expand, X, ArrowUp, Loader2 } from "lucide-react";
+import { Pin, Expand, X, ArrowUp, Loader2, Minus } from "lucide-react";
 import type { PanelData } from "@/app/page";
 import { contextAwareFollowUpQueries } from '@/ai/flows/context-aware-follow-up-queries';
 
@@ -14,9 +14,10 @@ interface KnowledgePanelProps {
   onFocus: (id: string) => void;
   onPositionChange: (id: string, position: { x: number; y: number }) => void;
   onSizeChange: (id: string, size: { width: number; height: number }) => void;
+  onToggleMinimize: (id: string) => void;
 }
 
-export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, onSizeChange }: KnowledgePanelProps) {
+export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, onSizeChange, onToggleMinimize }: KnowledgePanelProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [followUp, setFollowUp] = useState("");
@@ -117,6 +118,7 @@ export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, 
           <div className="flex items-center gap-1 flex-shrink-0">
             <Button variant="ghost" size="icon" className="h-7 w-7"><Pin className="h-4 w-4" /></Button>
             <Button variant="ghost" size="icon" className="h-7 w-7"><Expand className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onToggleMinimize(panelData.id)}><Minus className="h-4 w-4" /></Button>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onClose(panelData.id)}><X className="h-4 w-4" /></Button>
           </div>
         </CardHeader>
