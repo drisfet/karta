@@ -135,7 +135,7 @@ export default function Home() {
       </div>
       
       {minimizedPanels.length > 0 && (
-        <div className="absolute bottom-0 left-20 right-0 h-16 bg-black/10 backdrop-blur-md p-2 flex items-center gap-2 overflow-x-auto z-50">
+        <div className="absolute top-0 left-20 right-0 h-16 bg-black/10 backdrop-blur-md p-2 flex items-center gap-2 overflow-x-auto z-50">
           {minimizedPanels.map(panel => (
             <MinimizedPanel key={panel.id} panelData={panel} onRestore={() => toggleMinimizePanel(panel.id)} />
           ))}
