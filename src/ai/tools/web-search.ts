@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview A Genkit tool for performing web searches using Tavily.
+ * @fileOverview A Genkit tool for performing web searches.
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
@@ -15,20 +15,21 @@ export const webSearch = ai.defineTool(
     outputSchema: z.any(),
   },
   async (input) => {
-    console.warn("Web search is currently disabled. Returning placeholder data. To enable, configure a search provider.");
+    console.warn("Web search is currently mocked. Returning placeholder data.");
+    // This is a placeholder. In a real scenario, you would use a search API.
     return {
-        results: [
-            {
-                title: `Web Search is Not Configured`,
-                url: "https://firebase.google.com/docs/studio",
-                content: `The web search tool has not been configured. Please ask the developer to set up an appropriate search provider API key in the environment variables.`
-            },
-             {
-                title: `Example Search Result`,
-                url: "https://www.google.com/search?q=" + encodeURIComponent(input.query),
-                content: `This is placeholder content for the query: "${input.query}". The search tool is returning example data.`
-            }
-        ]
-    }
+      results: [
+        {
+          title: `Results for "${input.query}"`,
+          url: '#',
+          content: `This is a placeholder result for the query: ${input.query}. To implement real web search, you would integrate a search API here.`,
+        },
+        {
+            title: 'Placeholder Result 2',
+            url: '#',
+            content: 'This is another placeholder result.'
+        }
+      ],
+    };
   }
 );
