@@ -1,11 +1,11 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Paperclip, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ModelSwitcher } from "./model-switcher";
 import { SearchSourceSwitcher } from "./search-source-switcher";
+import { AttachmentButton } from "./attachment-button";
+import { VoiceInputButton } from "./voice-input-button";
 
 interface QueryInputProps {
     query: string;
@@ -31,8 +31,8 @@ export function QueryInput({ query, onQueryChange, isFocused }: QueryInputProps)
             >
                 <ModelSwitcher />
                 <SearchSourceSwitcher />
-                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"><Paperclip className="h-5 w-5" /></Button>
-                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"><Mic className="h-5 w-5" /></Button>
+                <AttachmentButton />
+                <VoiceInputButton />
             </div>
         </div>
     );
