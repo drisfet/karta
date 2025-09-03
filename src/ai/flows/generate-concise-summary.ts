@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { webSearch } from '../tools/web-search';
 
 const GenerateConciseSummaryInputSchema = z.object({
   query: z.string().describe('The user query to summarize.'),
@@ -44,13 +45,14 @@ const prompt = ai.definePrompt({
   name: 'generateConciseSummaryPrompt',
   input: {schema: GenerateConciseSummaryInputSchema},
   output: {schema: GenerateConciseSummaryOutputSchema},
+  tools: [webSearch],
   prompt: `You are an AI assistant that provides a comprehensive and well-structured answer to a user's query.
 
   For the user query: "{{query}}", provide the following:
   
-  1.  **Summary**: A concise, well-written summary that directly answers the user's question.
+  1.  **Summary**: A concise, well-written summary that directly answers the user's question. Use the webSearch tool if you need to find real-time or specific information.
   2.  **Images**: A list of 4-6 diverse and relevant images. For each, provide a URL from picsum.photos, descriptive alt text, and a 1-2 word AI hint for a real image.
-  3.  **Sources**: A list of 3-5 credible sources. For each, provide the URL, title, and a favicon URL (e.g., https://www.google.com/s2/favicons?domain=<domain>&sz=16).
+  3.  **Sources**: A list of 3-5 credible sources. If you used the webSearch tool, use the sources from the search results. For each, provide the URL, title, and a favicon URL (e.g., https://www.google.com/s2/favicons?domain=<domain>&sz=16).
   4.  **Steps**: A list of 3-4 high-level steps or key points related to the answer. If the query isn't procedural, these can be key takeaways.
   
   Prioritize providing sources based in Australia if possible.
