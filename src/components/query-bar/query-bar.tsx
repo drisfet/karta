@@ -2,7 +2,7 @@
 
 import { FormEvent, useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Sparkles, Wand } from "lucide-react";
+import { Sparkles, Wand } from "lucide-react";
 import { QueryInput } from "./query-input";
 import { QueryModeDropdown } from "./query-mode-dropdown";
 import { QueryFocus } from "./query-focus";
@@ -60,14 +60,6 @@ export function QueryBar({ onQuery }: QueryBarProps) {
                     </div>
                     
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                        <Button
-                            type="submit"
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"
-                        >
-                            <Search className="h-5 w-5" />
-                        </Button>
                         <Button
                             type="submit"
                             size="icon"

@@ -2,7 +2,7 @@
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Bot, Globe, Paperclip, Mic } from "lucide-react";
+import { Bot, Globe, Paperclip, Mic, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface QueryInputProps {
@@ -26,11 +26,11 @@ export function QueryInput({ query, onQueryChange, isFocused }: QueryInputProps)
                 onChange={(e) => onQueryChange(e.target.value)}
                 onInput={handleTextareaInput}
                 placeholder="Ask anything, mate..."
-                className="h-14 rounded-full border-2 bg-neutral-900/80 pl-6 pr-44 text-base backdrop-blur-sm focus:border-primary resize-none overflow-hidden transition-all duration-300 focus:rounded-2xl focus:h-20"
+                className="h-14 rounded-full border-2 bg-neutral-900/80 pl-6 pr-52 text-base backdrop-blur-sm focus:border-primary resize-none overflow-hidden transition-all duration-300 focus:rounded-2xl focus:h-20"
             />
             <div 
                 className={cn(
-                    "absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity duration-300",
+                    "absolute right-14 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity duration-300",
                     isFocused ? "opacity-100" : "opacity-0 pointer-events-none"
                 )}
             >
@@ -38,6 +38,15 @@ export function QueryInput({ query, onQueryChange, isFocused }: QueryInputProps)
                 <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"><Globe className="h-5 w-5" /></Button>
                 <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"><Paperclip className="h-5 w-5" /></Button>
                 <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"><Mic className="h-5 w-5" /></Button>
+            </div>
+            
+            <div 
+                className={cn(
+                    "absolute left-4 top-1/2 -translate-y-1/2 flex items-center transition-opacity duration-300",
+                    !isFocused ? "opacity-100" : "opacity-0 pointer-events-none"
+                )}
+            >
+                <Search className="h-5 w-5 text-muted-foreground" />
             </div>
         </div>
     );
