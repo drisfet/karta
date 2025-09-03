@@ -94,12 +94,14 @@ export default function Home() {
   const minimizedPanels = panels.filter(p => p.isMinimized);
   const openPanels = panels.filter(p => !p.isMinimized);
 
+  const showMainContent = openPanels.length === 0;
+
   return (
     <main className="h-screen w-screen overflow-hidden bg-background">
       <AppSidebar />
       <div className="h-full pl-20">
         <div className="relative flex h-full flex-col p-6">
-          <div className="flex-grow transition-opacity duration-500" style={{ opacity: panels.length > 0 ? 0 : 1 }}>
+          <div className="flex-grow transition-opacity duration-500" style={{ opacity: showMainContent ? 1 : 0 }}>
             <div className="flex flex-col items-center justify-center h-full text-center -mt-24">
               <h1 className="text-5xl font-headline font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-400">
                 G'day! What's the go?
@@ -111,7 +113,7 @@ export default function Home() {
           </div>
           
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-10 space-y-6">
-             <div className="transition-opacity duration-500" style={{ opacity: panels.length > 0 ? 0 : 1, pointerEvents: panels.length > 0 ? 'none' : 'auto' }}>
+             <div className="transition-opacity duration-500" style={{ opacity: showMainContent ? 1 : 0, pointerEvents: showMainContent ? 'auto' : 'none' }}>
                 {isClient && <ConversationStarters onQuery={handleQuery} />}
              </div>
              <QueryBar onQuery={handleQuery} />
