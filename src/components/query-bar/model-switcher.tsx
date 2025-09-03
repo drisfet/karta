@@ -3,19 +3,17 @@
 import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Bot, Check, ChevronDown, Rocket } from "lucide-react";
+import { Bot, Check, ChevronDown, Rocket, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const models = [
-    { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", description: "Fast and efficient", icon: Rocket },
-    { id: "gemini-2.0-pro", name: "Gemini 2.0 Pro", description: "Powerful and capable", icon: Bot },
+    { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", description: "Fast and efficient", icon: Zap },
+    { id: "gemini-2.0-pro", name: "Gemini 2.0 Pro", description: "Powerful and capable", icon: Rocket },
 ];
 
 export function ModelSwitcher() {
     const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
     const [isOpen, setIsOpen] = useState(false);
-
-    const CurrentModelIcon = models.find(m => m.id === selectedModel)?.icon || Bot;
 
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -25,7 +23,7 @@ export function ModelSwitcher() {
                     size="icon" 
                     className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"
                 >
-                    <CurrentModelIcon className="h-5 w-5" />
+                    <Bot className="h-5 w-5" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 bg-neutral-800 border-neutral-700 text-white p-2" sideOffset={10} align="end">
