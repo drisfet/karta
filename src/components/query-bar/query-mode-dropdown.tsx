@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -7,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Search, ChevronDown } from "lucide-react";
 
 export function QueryModeDropdown() {
-    const [proMode, setProMode] = useState(false);
+    const [deepResearchMode, setDeepResearchMode] = useState(false);
 
     return (
         <Popover>
@@ -28,14 +29,11 @@ export function QueryModeDropdown() {
                     <div className="border-t border-neutral-700 -mx-4"></div>
                     <div className="flex items-center justify-between">
                          <div className="space-y-1">
-                             <label htmlFor="pro-mode" className="font-medium">Try Pro Search</label>
-                             <p className="text-xs text-muted-foreground">3x more sources with powerful models.</p>
+                             <label htmlFor="deep-research-mode" className="font-medium">Deep Research</label>
+                             <p className="text-xs text-muted-foreground">Comprehensive results from more sources.</p>
                          </div>
-                        <Switch id="pro-mode" checked={proMode} onCheckedChange={setProMode} />
+                        <Switch id="deep-research-mode" checked={deepResearchMode} onCheckedChange={setDeepResearchMode} />
                     </div>
-                    <Button className="w-full bg-primary/80 hover:bg-primary">
-                        Sign in for access
-                    </Button>
                 </div>
             </PopoverContent>
         </Popover>
