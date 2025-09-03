@@ -57,8 +57,6 @@ function StarterCard({ title, query, hint, onQuery }: StarterCardProps) {
           src={`https://picsum.photos/400/300?random=${Buffer.from(hint).toString('hex')}`}
           alt={title}
           fill
-          width={400}
-          height={300}
           className="object-cover opacity-20 transition-opacity group-hover:opacity-30"
           data-ai-hint={hint}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
