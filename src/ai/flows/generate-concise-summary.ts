@@ -12,22 +12,27 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateConciseSummaryInputSchema = z.object({
-  searchResults: z
-    .string()
-    .describe('The search results to summarize.'),
+  query: z.string().describe('The user query to summarize.'),
 });
 
-export type GenerateConciseSummaryInput = z.infer<
-  typeof GenerateConciseSummaryInputSchema
->;
+export type GenerateConciseSummaryInput = z.infer<typeof GenerateConciseSummaryInputSchema>;
 
 const GenerateConciseSummaryOutputSchema = z.object({
   summary: z.string().describe('A concise summary of the search results.'),
+  images: z.array(z.object({
+    url: z.string().url().describe('URL of the image.'),
+    alt: z.string().describe('Alt text for the image.'),
+    aiHint: z.string().describe('AI hint for the image.'),
+  })).describe('A list of relevant images.'),
+  sources: z.array(z.object({
+    url: z.string().url().describe('URL of the source.'),
+    title: z.string().describe('Title of the source.'),
+    favicon: z.string().describe('URL of the source\'s favicon.'),
+  })).describe('A list of sources used.'),
+  steps: z.array(z.string()).describe('A list of steps related to the query.'),
 });
 
-export type GenerateConciseSummaryOutput = z.infer<
-  typeof GenerateConciseSummaryOutputSchema
->;
+export type GenerateConciseSummaryOutput = z.infer<typeof GenerateConciseSummaryOutputSchema>;
 
 export async function generateConciseSummary(
   input: GenerateConciseSummaryInput
@@ -39,10 +44,17 @@ const prompt = ai.definePrompt({
   name: 'generateConciseSummaryPrompt',
   input: {schema: GenerateConciseSummaryInputSchema},
   output: {schema: GenerateConciseSummaryOutputSchema},
-  prompt: `You are an AI assistant that summarizes search results into a concise summary.
+  prompt: `You are an AI assistant that provides a comprehensive and well-structured answer to a user's query.
 
-  Summarize the following search results:
-  {{searchResults}}`,
+  For the user query: "{{query}}", provide the following:
+  
+  1.  **Summary**: A concise, well-written summary that directly answers the user's question.
+  2.  **Images**: A list of 4-6 diverse and relevant images. For each, provide a URL from picsum.photos, descriptive alt text, and a 1-2 word AI hint for a real image.
+  3.  **Sources**: A list of 3-5 credible sources. For each, provide the URL, title, and a favicon URL (e.g., https://www.google.com/s2/favicons?domain=<domain>&sz=16).
+  4.  **Steps**: A list of 3-4 high-level steps or key points related to the answer. If the query isn't procedural, these can be key takeaways.
+  
+  Prioritize providing sources based in Australia if possible.
+  `,
 });
 
 const generateConciseSummaryFlow = ai.defineFlow(

@@ -5,17 +5,17 @@ import { QueryBar } from "@/components/query-bar";
 import { ConversationStarters } from "@/components/conversation-starters";
 import { KnowledgePanel } from "@/components/knowledge-panel";
 import React, { useState, useEffect } from "react";
-import { generateConciseSummary } from "@/ai/flows/generate-concise-summary";
+import { generateConciseSummary, GenerateConciseSummaryOutput } from "@/ai/flows/generate-concise-summary";
 import { MinimizedPanel } from "@/components/minimized-panel";
 
-export interface PanelData {
+export interface PanelData extends GenerateConciseSummaryOutput {
   id: string;
   query: string;
-  summary: string;
   position: { x: number; y: number };
   size: { width: number; height: number };
   zIndex: number;
   isMinimized: boolean;
+  isLoading: boolean;
 }
 
 export default function Home() {
@@ -47,20 +47,24 @@ export default function Home() {
     const newPanelPlaceholder: PanelData = {
       id: newId,
       query,
-      summary: "Thinking...",
+      summary: "",
+      images: [],
+      sources: [],
+      steps: [],
       position: { x: window.innerWidth / 2 - 275 + (Math.random() - 0.5) * 100, y: window.innerHeight / 2 - 300 + (Math.random() - 0.5) * 100 },
       size: { width: 550, height: 600 },
       zIndex: maxZ + 1,
       isMinimized: false,
+      isLoading: true,
     };
     setPanels(prev => [...prev, newPanelPlaceholder]);
 
     try {
-      const result = await generateConciseSummary({ searchResults: `Information about ${query}` });
-      setPanels(prev => prev.map(p => p.id === newId ? { ...p, summary: result.summary } : p));
+      const result = await generateConciseSummary({ query });
+      setPanels(prev => prev.map(p => p.id === newId ? { ...p, ...result, isLoading: false } : p));
     } catch (error) {
       console.error("AI Error:", error);
-      setPanels(prev => prev.map(p => p.id === newId ? { ...p, summary: "Sorry, couldn't fetch that." } : p));
+      setPanels(prev => prev.map(p => p.id === newId ? { ...p, summary: "Sorry, couldn't fetch that.", isLoading: false } : p));
     }
   };
 
