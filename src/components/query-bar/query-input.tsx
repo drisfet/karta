@@ -1,6 +1,6 @@
 "use client";
 
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Bot, Globe, Paperclip, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,20 +13,13 @@ interface QueryInputProps {
 
 export function QueryInput({ query, onQueryChange, isFocused }: QueryInputProps) {
     
-    const handleTextareaInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
-        const textarea = e.currentTarget;
-        textarea.style.height = 'auto';
-        textarea.style.height = `${textarea.scrollHeight}px`;
-    };
-    
     return (
         <div className="relative w-full">
-            <Textarea
+            <Input
                 value={query}
                 onChange={(e) => onQueryChange(e.target.value)}
-                onInput={handleTextareaInput}
                 placeholder="Ask anything, mate..."
-                className="h-14 rounded-full border-2 bg-neutral-900/80 px-4 pr-52 text-base backdrop-blur-sm focus:border-primary resize-none overflow-hidden transition-all duration-300 focus:rounded-2xl focus:h-20"
+                className="h-14 rounded-full border-2 bg-neutral-900/80 px-4 pr-52 text-base backdrop-blur-sm focus:border-primary transition-all duration-300"
             />
             <div 
                 className={cn(
