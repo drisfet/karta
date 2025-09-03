@@ -1,7 +1,7 @@
 "use client";
 
 import { AppSidebar } from "@/components/layout/sidebar";
-import { QueryBar } from "@/components/query-bar";
+import { QueryBar } from "@/components/query-bar/query-bar";
 import { ConversationStarters } from "@/components/conversation-starters";
 import { KnowledgePanel } from "@/components/knowledge-panel";
 import React, { useState, useEffect } from "react";
@@ -99,7 +99,7 @@ export default function Home() {
   const minimizedPanels = panels.filter(p => p.isMinimized);
   const openPanels = panels.filter(p => !p.isMinimized);
 
-  const showMainContent = openPanels.length === 0;
+  const showMainContent = panels.every(p => p.isMinimized);
 
   return (
     <main className="h-screen w-screen overflow-hidden bg-background">
@@ -117,7 +117,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-10 space-y-6">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-10 space-y-4">
              <div className="transition-opacity duration-500" style={{ opacity: showMainContent ? 1 : 0, pointerEvents: showMainContent ? 'auto' : 'none' }}>
                 {isClient && <ConversationStarters onQuery={handleQuery} />}
              </div>

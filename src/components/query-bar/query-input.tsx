@@ -1,0 +1,44 @@
+"use client";
+
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Bot, Globe, Paperclip, Mic } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface QueryInputProps {
+    query: string;
+    onQueryChange: (query: string) => void;
+    isFocused: boolean;
+}
+
+export function QueryInput({ query, onQueryChange, isFocused }: QueryInputProps) {
+    
+    const handleTextareaInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+        const textarea = e.currentTarget;
+        textarea.style.height = 'auto';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    };
+    
+    return (
+        <div className="relative w-full">
+            <Textarea
+                value={query}
+                onChange={(e) => onQueryChange(e.target.value)}
+                onInput={handleTextareaInput}
+                placeholder="Ask anything, mate..."
+                className="h-14 rounded-full border-2 bg-neutral-900/80 pl-6 pr-44 text-base backdrop-blur-sm focus:border-primary resize-none overflow-hidden transition-all duration-300 focus:rounded-2xl focus:h-20"
+            />
+            <div 
+                className={cn(
+                    "absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity duration-300",
+                    isFocused ? "opacity-100" : "opacity-0 pointer-events-none"
+                )}
+            >
+                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"><Bot className="h-5 w-5" /></Button>
+                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"><Globe className="h-5 w-5" /></Button>
+                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"><Paperclip className="h-5 w-5" /></Button>
+                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:bg-neutral-700 hover:text-white"><Mic className="h-5 w-5" /></Button>
+            </div>
+        </div>
+    );
+}
