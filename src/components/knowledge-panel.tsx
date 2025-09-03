@@ -28,6 +28,21 @@ export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, 
   
   const panelRef = useRef<HTMLDivElement>(null);
   const offset = useRef({ x: 0, y: 0 });
+  const answerContentRef = useRef<HTMLDivElement>(null);
+  const scrollAnchorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollAnchorRef.current) {
+      const parent = answerContentRef.current;
+      if (parent) {
+        const isScrolledToBottom = parent.scrollHeight - parent.clientHeight <= parent.scrollTop + 2; // 2px tolerance
+        if (isScrolledToBottom) {
+          scrollAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }
+    }
+  }, [followUpHistory, isThinkingFollowUp]);
+
 
   const handleMouseDownDrag = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('button, input, [role="tab"]')) return;
@@ -80,6 +95,7 @@ export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, 
       
       const currentQuery = followUp;
       setFollowUp("");
+      setFollowUpHistory(prev => [...prev, { query: currentQuery, answer: '' }]);
       setIsThinkingFollowUp(true);
 
       try {
@@ -88,10 +104,10 @@ export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, 
           followUpQuery: currentQuery,
           knowledgePanelContent: panelData.summary + "\n" + followUpHistory.map(h => `Q: ${h.query}\nA: ${h.answer}`).join("\n"),
         });
-        setFollowUpHistory(prev => [...prev, { query: currentQuery, answer: result.answer }]);
+        setFollowUpHistory(prev => prev.map(h => h.query === currentQuery ? { ...h, answer: result.answer } : h));
       } catch (error) {
         console.error("Follow-up AI error:", error);
-        setFollowUpHistory(prev => [...prev, { query: currentQuery, answer: "I couldn't process that, mate. Try again." }]);
+        setFollowUpHistory(prev => prev.map(h => h.query === currentQuery ? { ...h, answer: "I couldn't process that, mate. Try again." } : h));
       } finally {
         setIsThinkingFollowUp(false);
       }
@@ -114,7 +130,7 @@ export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, 
           {panelData.sources && panelData.sources.length > 0 && <TabsTrigger value="sources" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-white rounded-none px-2 text-muted-foreground"><LinkIcon className="mr-2" /> Sources</TabsTrigger>}
           {panelData.steps && panelData.steps.length > 0 && <TabsTrigger value="steps" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-white rounded-none px-2 text-muted-foreground"><ListChecks className="mr-2" /> Thunk</TabsTrigger>}
         </TabsList>
-        <div className="flex-grow overflow-y-auto">
+        <div className="flex-grow overflow-y-auto" ref={answerContentRef}>
           <TabsContent value="answer" className="p-4 mt-0">
             <div className="space-y-4">
                 <p className="text-sm leading-relaxed">{panelData.summary}</p>
@@ -126,6 +142,7 @@ export function KnowledgePanel({ panelData, onClose, onFocus, onPositionChange, 
                   </div>
                 ))}
                 {isThinkingFollowUp && <Loader2 className="mt-4 h-5 w-5 animate-spin text-primary" />}
+                <div ref={scrollAnchorRef} />
             </div>
           </TabsContent>
           <TabsContent value="images" className="p-4 mt-0">
