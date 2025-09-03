@@ -7,6 +7,7 @@ import { KnowledgePanel } from "@/components/knowledge-panel";
 import React, { useState, useEffect } from "react";
 import { generateConciseSummary, GenerateConciseSummaryOutput } from "@/ai/flows/generate-concise-summary";
 import { MinimizedPanel } from "@/components/minimized-panel";
+import { nanoid } from "nanoid";
 
 export interface PanelData extends GenerateConciseSummaryOutput {
   id: string;
@@ -41,7 +42,7 @@ export default function Home() {
 
   const handleQuery = async (query: string) => {
     if (!isClient) return;
-    const newId = `panel-${Date.now()}`;
+    const newId = nanoid();
     const maxZ = panels.length > 0 ? Math.max(...panels.map(p => p.zIndex)) : 0;
     
     const newPanelPlaceholder: PanelData = {
