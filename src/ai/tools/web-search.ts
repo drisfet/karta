@@ -1,6 +1,7 @@
 'use server';
 /**
- * @fileOverview A Genkit tool for performing web searches using Tavily.
+ * @fileOverview A Genkit tool for performing web searches. This tool is currently
+ * configured to return placeholder data and does not perform live web searches.
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
@@ -19,23 +20,25 @@ export const webSearch = ai.defineTool(
           title: z.string(),
           url: z.string().url(),
           content: z.string(),
-          score: z.number(),
-          raw_content: z.string().optional(),
         })
       ),
     }),
   },
   async (input) => {
     console.warn(
-      'Web search is currently mocked. Returning placeholder data. Please set TAVILY_API_KEY in your .env file and install the required package.'
+      'Web search is currently configured to return placeholder data. To enable real web search, a third-party search provider (like Tavily) and an API key are required.'
     );
     return {
       results: [
         {
-          title: `Placeholder Results for "${input.query}"`,
-          url: 'https://www.google.com/search?q=tavily+api',
-          content: `This is placeholder data because the web search tool is not fully configured. To enable real web search, you need a service like Tavily and its API key.`,
-          score: 0,
+          title: `Placeholder: Top result for "${input.query}"`,
+          url: 'https://firebase.google.com',
+          content: `This is placeholder search result content. The web search tool is not fully configured. You would typically see a summary of a webpage here.`,
+        },
+        {
+          title: 'Placeholder: Firebase Documentation',
+          url: 'https://firebase.google.com/docs',
+          content: 'Explore the official Firebase documentation for guides, references, and more.',
         },
       ],
     };
