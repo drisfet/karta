@@ -1,10 +1,12 @@
 'use server';
 /**
- * @fileOverview A Genkit tool for performing web searches. This tool is currently
- * configured to return placeholder data and does not perform live web searches.
+ * @fileOverview A Genkit tool for performing web searches using the Tavily API.
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import Tavily from '@tavily/core';
+
+const tavilyClient = new Tavily(process.env.TAVILY_API_KEY || '');
 
 export const webSearch = ai.defineTool(
   {
@@ -25,22 +27,37 @@ export const webSearch = ai.defineTool(
     }),
   },
   async (input) => {
-    console.warn(
-      'Web search is currently configured to return placeholder data. To enable real web search, a third-party search provider (like Tavily) and an API key are required.'
-    );
-    return {
-      results: [
-        {
-          title: `Placeholder: Top result for "${input.query}"`,
-          url: 'https://firebase.google.com',
-          content: `This is placeholder search result content. The web search tool is not fully configured. You would typically see a summary of a webpage here.`,
-        },
-        {
-          title: 'Placeholder: Firebase Documentation',
-          url: 'https://firebase.google.com/docs',
-          content: 'Explore the official Firebase documentation for guides, references, and more.',
-        },
-      ],
-    };
+    if (!process.env.TAVILY_API_KEY) {
+      console.warn('TAVILY_API_KEY is not set. Returning placeholder data.');
+      return {
+        results: [
+          {
+            title: `Placeholder: Top result for "${input.query}"`,
+            url: 'https://firebase.google.com',
+            content: `This is placeholder search result content because the TAVILY_API_KEY is not configured.`,
+          },
+        ],
+      };
+    }
+
+    try {
+      const searchResult = await tavilyClient.search(input.query, {
+        maxResults: 5,
+        includeImages: false,
+      });
+
+      // We need to map the Tavily result to our tool's output schema.
+      return {
+        results: searchResult.results.map((result: any) => ({
+          title: result.title,
+          url: result.url,
+          content: result.content,
+        })),
+      };
+    } catch (error) {
+      console.error('Tavily search failed:', error);
+      // Return an empty result set on error to avoid crashing the flow.
+      return { results: [] };
+    }
   }
 );
