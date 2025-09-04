@@ -4,9 +4,9 @@
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { tavily as Tavily } from '@tavily/core';
+import { tavily } from '@tavily/core';
 
-const tavilyClient = new Tavily(process.env.TAVILY_API_KEY || '');
+const tavilyClient = tavily(process.env.TAVILY_API_KEY || '');
 
 export const webSearch = ai.defineTool(
   {
