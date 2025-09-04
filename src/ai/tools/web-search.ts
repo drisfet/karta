@@ -4,7 +4,7 @@
  */
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import Tavily from '@tavily/core';
+import { tavily as Tavily } from '@tavily/core';
 
 const tavilyClient = new Tavily(process.env.TAVILY_API_KEY || '');
 
