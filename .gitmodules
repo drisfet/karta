@@ -1,6 +1,0 @@
-[submodule "reference-apps/langchain-nextjs-template"]
-	path = reference-apps/langchain-nextjs-template
-	url = https://github.com/langchain-ai/langchain-nextjs-template.git
-[submodule "reference-apps/morphic"]
-	path = reference-apps/morphic
-	url = https://github.com/miurla/morphic.git
