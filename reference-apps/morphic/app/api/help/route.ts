@@ -44,9 +44,10 @@ class ServerHelpSystem {
 
   private async loadHelpDocuments(): Promise<void> {
     const helpDir = path.join(process.cwd(), this.basePath)
+    console.log(`[Help System] Attempting to load help documents from: ${helpDir}`)
 
     if (!fs.existsSync(helpDir)) {
-      console.warn(`Help directory not found: ${helpDir}`)
+      console.warn(`[Help System] Help directory not found: ${helpDir}`)
       return
     }
 
@@ -54,21 +55,32 @@ class ServerHelpSystem {
       .filter(dirent => dirent.isDirectory())
       .map(dirent => dirent.name)
 
+    console.log(`[Help System] Found categories: ${categories.join(', ')}`)
+
     for (const category of categories) {
       const categoryPath = path.join(helpDir, category)
+      console.log(`[Help System] Loading documents for category: ${category}`)
       await this.loadCategoryDocuments(category, categoryPath)
     }
+
+    console.log(`[Help System] Successfully loaded ${this.cache.size} help documents`)
   }
 
   private async loadCategoryDocuments(category: string, categoryPath: string): Promise<void> {
     const files = fs.readdirSync(categoryPath)
       .filter(file => file.endsWith('.md'))
 
+    console.log(`[Help System] Found ${files.length} MD files in ${category}: ${files.join(', ')}`)
+
     for (const file of files) {
       const filePath = path.join(categoryPath, file)
+      console.log(`[Help System] Processing file: ${filePath}`)
       const document = this.parseMarkdownFile(filePath, category)
       if (document) {
         this.cache.set(document.id, document)
+        console.log(`[Help System] Successfully loaded document: ${document.id}`)
+      } else {
+        console.warn(`[Help System] Failed to parse document: ${filePath}`)
       }
     }
   }
@@ -195,6 +207,97 @@ class ServerHelpSystem {
 
     return formattedHelp
   }
+
+  async generateSuggestions(category: string): Promise<Array<{ heading: string; message: string }>> {
+    console.log(`[Help System] Generating suggestions for category: ${category}`)
+
+    const documents = this.getCategoryDocuments(category)
+    if (documents.length === 0) {
+      console.log(`[Help System] No documents found for category: ${category}`)
+      return this.getDefaultSuggestions()
+    }
+
+    const suggestions: Array<{ heading: string; message: string }> = []
+
+    // Extract key topics and questions from document content
+    for (const doc of documents.slice(0, 2)) { // Process top 2 documents
+      const content = doc.content.toLowerCase()
+
+      // Look for common question patterns
+      const questionPatterns = [
+        /how (do|to|can)/g,
+        /what (is|are|do)/g,
+        /why (do|is)/g,
+        /when (do|should)/g,
+        /where (do|can)/g
+      ]
+
+      // Extract headings as potential question topics
+      const headings = doc.content.match(/^#{1,3}\s+(.+)$/gm) || []
+      for (const heading of headings.slice(0, 2)) {
+        const cleanHeading = heading.replace(/^#{1,3}\s+/, '').trim()
+        if (cleanHeading.length > 10 && cleanHeading.length < 50) {
+          suggestions.push({
+            heading: `About ${cleanHeading}`,
+            message: `Tell me about ${cleanHeading.toLowerCase()}`
+          })
+        }
+      }
+
+      // Generate contextual questions based on content
+      if (content.includes('workflow') || content.includes('node')) {
+        suggestions.push({
+          heading: 'How do workflows work?',
+          message: 'How do I create and manage workflows?'
+        })
+      }
+
+      if (content.includes('troubleshoot') || content.includes('error')) {
+        suggestions.push({
+          heading: 'Common issues and fixes',
+          message: 'What are common issues and how do I fix them?'
+        })
+      }
+
+      if (content.includes('feature') || content.includes('tool')) {
+        suggestions.push({
+          heading: 'Available features',
+          message: 'What features and tools are available?'
+        })
+      }
+    }
+
+    // Ensure we have at least 4 suggestions
+    while (suggestions.length < 4) {
+      const defaultSuggestions = this.getDefaultSuggestions()
+      const needed = 4 - suggestions.length
+      suggestions.push(...defaultSuggestions.slice(0, needed))
+    }
+
+    console.log(`[Help System] Generated ${suggestions.length} suggestions`)
+    return suggestions.slice(0, 4) // Return top 4
+  }
+
+  private getDefaultSuggestions(): Array<{ heading: string; message: string }> {
+    return [
+      {
+        heading: 'Getting started guide',
+        message: 'How do I get started with this feature?'
+      },
+      {
+        heading: 'Basic usage instructions',
+        message: 'What are the basic steps to use this?'
+      },
+      {
+        heading: 'Common questions',
+        message: 'What are some common questions about this?'
+      },
+      {
+        heading: 'Advanced features',
+        message: 'What advanced features are available?'
+      }
+    ]
+  }
 }
 
 // Singleton instance
@@ -208,7 +311,9 @@ export async function GET(request: NextRequest) {
   const id = searchParams.get('id')
 
   try {
+    console.log(`[Help API] Initializing help system...`)
     await serverHelpSystem.initialize()
+    console.log(`[Help API] Help system initialized successfully`)
 
     switch (action) {
       case 'search':
@@ -245,6 +350,15 @@ export async function GET(request: NextRequest) {
         }
         const formattedHelp = serverHelpSystem.getFormattedHelp(query, category || undefined)
         return NextResponse.json({ help: formattedHelp })
+
+      case 'suggestions':
+        if (!category) {
+          return NextResponse.json({ error: 'Category parameter required' }, { status: 400 })
+        }
+        console.log(`[Help API] Generating suggestions for category: ${category}`)
+        const suggestions = await serverHelpSystem.generateSuggestions(category)
+        console.log(`[Help API] Generated ${suggestions.length} suggestions`)
+        return NextResponse.json({ suggestions })
 
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })

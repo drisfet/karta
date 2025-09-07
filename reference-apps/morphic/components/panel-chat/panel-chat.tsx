@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useChat } from '@ai-sdk/react'
 import { ChatRequestOptions } from 'ai'
@@ -26,6 +26,9 @@ interface PanelChatProps {
   className?: string
   onMessageSent?: (message: string) => void
   compactMode?: boolean // For smaller panels
+  appendMessage?: (appendFn: (message: { role: 'user'; content: string }) => void) => void // For programmatic message sending
+  onMessageCountChange?: (count: number) => void // Callback for message count changes
+  section?: string // Section/category for help-specific responses
 }
 
 export function PanelChat({
@@ -35,7 +38,10 @@ export function PanelChat({
   placeholder = "Ask a question...",
   className = "",
   onMessageSent,
-  compactMode = false
+  compactMode = false,
+  appendMessage,
+  onMessageCountChange,
+  section = 'main-app'
 }: PanelChatProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
@@ -53,11 +59,12 @@ export function PanelChat({
     data,
     setData,
     addToolResult,
-    reload
+    reload,
+    append
   } = useChat({
     initialMessages,
     id: chatId,
-    body: { id: chatId },
+    body: { id: chatId, section },
     onFinish: () => {
       // Custom finish handler for panels
       onMessageSent?.(messages[messages.length - 1]?.content || '')
@@ -68,6 +75,25 @@ export function PanelChat({
     sendExtraMessageFields: false,
     experimental_throttle: 100
   })
+
+  const appendRef = useRef(append)
+
+  // Keep ref updated with latest append function
+  useEffect(() => {
+    appendRef.current = append
+  }, [append])
+
+  // Handle programmatic message sending
+  const handleAppendMessage = useCallback((message: { role: 'user'; content: string }) => {
+    appendRef.current(message)
+  }, []) // Stable callback that uses ref
+
+  // Expose append function via ref or callback
+  useEffect(() => {
+    if (appendMessage) {
+      appendMessage(handleAppendMessage)
+    }
+  }, [appendMessage, handleAppendMessage])
 
   const isLoading = status === 'submitted' || status === 'streaming'
 
@@ -194,6 +220,13 @@ export function PanelChat({
       }
     }
   }, [sections, messages])
+
+  // Notify parent of message count changes
+  useEffect(() => {
+    if (onMessageCountChange) {
+      onMessageCountChange(messages.length)
+    }
+  }, [messages.length, onMessageCountChange])
 
   const onQuerySelect = (query: string) => {
     // Handle query selection in panels

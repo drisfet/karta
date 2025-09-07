@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 
 import { Check, ChevronsUpDown, Lightbulb } from 'lucide-react'
@@ -75,7 +75,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
   }
 
   const selectedModel = models.find(model => createModelId(model) === value)
-  const groupedModels = groupModelsByProvider(models)
+  const groupedModels = useMemo(() => groupModelsByProvider(models), [models])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -23,13 +23,11 @@ import { TemplateManager } from '@/lib/studio/template-manager'
 import { createClientWorkflowExecutor } from '@/lib/studio/workflow-engine-client'
 import { AgentNodeData, ComponentDefinition, DataNodeData, ExecutionResult, LogicNodeData, ToolNodeData, UINodeData, WorkflowTemplate } from '@/lib/types/studio'
 
-import { StudioHelpChat } from '@/components/help'
+import { FloatingHelpPill } from '@/components/help'
 import { DataFlowEdge } from '@/components/studio/DataFlowEdge'
-import { ExecutionMonitor } from '@/components/studio/ExecutionMonitor'
+import { IntegratedSidebar } from '@/components/studio/IntegratedSidebar'
 import { NodePalette } from '@/components/studio/NodePalette'
 import { AgentNode, DataNode, LogicNode, ToolNode, UINode } from '@/components/studio/nodes'
-import { PropertyPanel } from '@/components/studio/PropertyPanel'
-import { TemplateLibrary } from '@/components/studio/TemplateLibrary'
 
 import '@xyflow/react/dist/style.css'
 
@@ -114,7 +112,6 @@ export default function AgentStudioPage() {
   const [isExecuting, setIsExecuting] = useState(false)
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null)
   const [activeFlows, setActiveFlows] = useState<Set<string>>(new Set())
-  const [isHelpOpen, setIsHelpOpen] = useState(false)
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null)
 
@@ -413,19 +410,6 @@ export default function AgentStudioPage() {
               >
                 🐛 Debug
               </button>
-              <button
-                onClick={() => {
-                  console.log('❓ HELP button clicked!')
-                  setIsHelpOpen(!isHelpOpen)
-                }}
-                className={`px-4 py-2 rounded-md text-sm transition-colors border ${
-                  isHelpOpen
-                    ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700'
-                    : 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200'
-                }`}
-              >
-                ❓ Help
-              </button>
             </div>
 
             <ReactFlow
@@ -450,71 +434,38 @@ export default function AgentStudioPage() {
             </ReactFlow>
           </div>
 
-          {/* Property Panel & Execution Monitor */}
-          <div className="flex">
-            <div className="w-80 border-l bg-background">
-              <PropertyPanel
-                selectedNode={selectedNode}
-                onNodeUpdate={onNodeUpdate}
-              />
-            </div>
-            <ExecutionMonitor
-              nodes={nodes}
-              executionResult={executionResult}
-              isExecuting={isExecuting}
-              onDebugStep={(nodeId) => {
-                // Find and highlight the node being stepped into
-                const nodeToSelect = nodes.find(node => node.id === nodeId)
-                if (nodeToSelect) {
-                  setSelectedNode(nodeToSelect)
-                }
-                alert(`Stepping into node: ${nodeId}`)
-              }}
-              onStopExecution={() => setIsExecuting(false)}
-              onResetWorkflow={() => {
-                setNodes(initialNodes)
-                setEdges(initialEdges)
-                setExecutionResult(null)
-                setSelectedNode(null)
-              }}
-            />
-            {/* Help Panel */}
-            {isHelpOpen && (
-              <div className="w-96 border-l bg-background flex flex-col">
-                <div className="p-4 border-b">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Studio Help</h3>
-                    <button
-                      onClick={() => setIsHelpOpen(false)}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Ask me anything about the Agent Studio!
-                  </p>
-                </div>
-                <div className="flex-1 p-4">
-                  <StudioHelpChat
-                    chatId="studio-help"
-                    compactMode={true}
-                    className="h-full"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Template Library */}
-          <TemplateLibrary
+          {/* Integrated Sidebar */}
+          <IntegratedSidebar
+            selectedNode={selectedNode}
+            nodes={nodes}
+            executionResult={executionResult}
+            isExecuting={isExecuting}
+            onNodeUpdate={onNodeUpdate}
+            onDebugStep={(nodeId: string) => {
+              // Find and highlight the node being stepped into
+              const nodeToSelect = nodes.find(node => node.id === nodeId)
+              if (nodeToSelect) {
+                setSelectedNode(nodeToSelect)
+              }
+              alert(`Stepping into node: ${nodeId}`)
+            }}
+            onStopExecution={() => setIsExecuting(false)}
+            onResetWorkflow={() => {
+              setNodes(initialNodes)
+              setEdges(initialEdges)
+              setExecutionResult(null)
+              setSelectedNode(null)
+            }}
             onLoadTemplate={handleLoadTemplate}
             onLoadComponent={handleLoadComponent}
-            onSaveWorkflow={handleSaveWorkflow}
+            onSaveWorkflow={saveWorkflowTemplate}
           />
+
+          {/* Floating Help Pill */}
+          <FloatingHelpPill />
         </div>
       </div>
-    </ReactFlowProvider>
+      </ReactFlowProvider>
     </HelpProvider>
   )
 }

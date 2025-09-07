@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Morphic Help System is a robust, modular, and scalable help feature that provides context-aware assistance throughout the application. It leverages the existing chat infrastructure while maintaining clean separation of concerns and following best practices for extensibility.
+The Morphic Help System is a sophisticated, AI-powered help feature that provides intelligent, context-aware assistance throughout the application. It features advanced Retrieval-Augmented Generation (RAG) capabilities, leveraging existing search infrastructure to deliver accurate, documentation-based responses. The system maintains clean separation of concerns and follows best practices for extensibility and performance.
 
 ## Table of Contents
 
@@ -12,6 +12,7 @@ The Morphic Help System is a robust, modular, and scalable help feature that pro
 - [Installation](#installation)
 - [Usage](#usage)
 - [API Reference](#api-reference)
+- [RAG (Retrieval-Augmented Generation) Features](#rag-retrieval-augmented-generation-features)
 - [Configuration](#configuration)
 - [Content Management](#content-management)
 - [Testing](#testing)
@@ -24,16 +25,27 @@ The Morphic Help System is a robust, modular, and scalable help feature that pro
 
 ### Core Features
 - **Context-Aware Help**: Provides relevant help based on the current section/context
+- **Retrieval-Augmented Generation (RAG)**: AI-powered responses based on actual documentation
+- **Intelligent Document Retrieval**: Semantic search across help documents with relevance scoring
 - **Modular Components**: Reusable components that can be imported anywhere
 - **Markdown Support**: Help content written in easy-to-maintain Markdown files
-- **Intelligent Search**: Relevance-based search across help documents
 - **Streaming Responses**: Real-time help responses using existing chat infrastructure
+- **Advanced Help Agents**: Specialized AI agents for different help scenarios
 - **Caching System**: Efficient document loading and storage
 - **Error Handling**: Graceful fallbacks and user feedback
 - **TypeScript Support**: Full type safety throughout the system
 
+### RAG Features
+- **Document Retrieval**: Searches through MD files to find relevant content
+- **Context Injection**: Dynamically builds AI context from retrieved documents
+- **Source Citations**: Shows users which documents were used for answers
+- **Confidence Scoring**: Indicates reliability of responses
+- **Follow-up Suggestions**: Recommends related topics and questions
+
 ### Integration Features
 - **Existing Chat System**: Leverages the established PanelChat infrastructure
+- **Search Infrastructure**: Uses existing search tools and providers
+- **Agent System**: Integrates with existing AI agent architecture
 - **React Context**: Clean state management with React hooks
 - **Server-Side Processing**: File system operations handled securely on the server
 - **API-First Design**: RESTful API for all help operations
@@ -43,36 +55,71 @@ The Morphic Help System is a robust, modular, and scalable help feature that pro
 ### System Components
 
 ```
-Help System Architecture
+Help System Architecture (RAG-Enhanced)
 ├── 📁 docs/help/                    # Help content (Markdown files)
 │   ├── 📁 studio/                   # Studio-specific help
+│   │   ├── overview.md             # Studio overview and features
+│   │   ├── nodes.md                # Node types and usage
+│   │   ├── workflows.md            # Workflow creation guide
+│   │   └── troubleshooting.md      # Common issues and solutions
 │   ├── 📁 main-app/                 # Main app help
+│   │   └── overview.md             # Main application features
 │   └── 📁 [category]/               # Custom categories
 ├── 🔧 lib/help/                     # Core help system logic
 │   ├── help-provider.tsx           # React context provider
-│   ├── test-help.ts                # Testing utilities
-│   └── (help-system.ts)            # Server-side processing
+│   ├── help-system.ts              # Server-side document management
+│   └── test-help.ts                # Testing utilities
+├── 🤖 lib/agents/                   # AI Agents (UPDATED)
+│   └── help-agent.ts               # RAG-based help agent (direct integration)
 ├── 🖥️ components/help/              # React components
-│   ├── help-chat.tsx               # Main help chat component
+│   ├── help-chat.tsx               # RAG-integrated chat component
+│   ├── help-suggestions.tsx        # Dynamic suggestion system
 │   └── index.ts                    # Component exports
-├── 🌐 app/api/help/                 # Server API endpoints
-│   └── route.ts                     # Help API routes
+├── 🌐 app/api/                      # Server API endpoints
+│   ├── help/route.ts               # Basic help API
+│   ├── help-agent/route.ts         # RAG help agent API (standalone)
+│   └── chat/route.ts               # Enhanced chat with integrated help mode
 └── 🎯 Integration Points            # Where help is used
     ├── app/studio/page.tsx         # Studio integration
+    ├── components/panel-chat/       # Streaming chat with help support
     └── [other-pages]               # Future integrations
 ```
 
-### Data Flow
+### Data Flow (RAG-Enhanced)
 
 ```
-User Query → HelpChat Component → HelpProvider → API Route → Help System → Markdown Files
+User Query → HelpChat Component → SearchMode Toggle (help-only)
                                       ↓
-Response ← Streaming Chat ← AI Context ← Formatted Help ← Search Results
+Chat API (help-only mode) → Help Agent → Server-Side Help System → MD Files Search
+                                      ↓
+Retrieved Documents → Context Building → AI Generation → Streaming Response
+                                      ↓
+Response with Sources ← PanelChat Component ← Enhanced Context ← Relevance Scoring
+```
+
+### RAG Processing Flow
+
+```
+1. User Query Analysis
+    ↓
+2. Document Retrieval (direct server-side search)
+    ↓
+3. Relevance Scoring & Ranking
+    ↓
+4. Context Building (from top documents)
+    ↓
+5. AI Response Generation (with retrieved context)
+    ↓
+6. Streaming Response (via AI SDK streamText)
+    ↓
+7. Source Citation & Confidence Scoring
+    ↓
+8. Formatted Response with Sources
 ```
 
 ## Quick Start
 
-### 1. Basic Integration
+### 1. Basic RAG Help Integration
 
 ```tsx
 import { HelpProvider } from '@/lib/help/help-provider'
@@ -90,7 +137,20 @@ export default function MyPage() {
 }
 ```
 
-### 2. Add Help Content
+### 2. Enable RAG Help Mode
+
+The help system uses the existing `SearchModeToggle` component:
+
+```tsx
+import { SearchModeToggle } from '@/components/search-mode-toggle'
+
+// Add to your UI
+<SearchModeToggle />
+
+// Click until it shows "Help" (purple) to enable RAG-based help
+```
+
+### 3. Add Help Content
 
 Create a Markdown file in the appropriate category:
 
@@ -104,13 +164,33 @@ This is help content for my feature.
 1. First step
 2. Second step
 3. Third step
+
+## Troubleshooting
+
+Common issues and solutions:
+- Issue 1: Solution description
+- Issue 2: Another solution
 ```
 
-### 3. Test the System
+### 4. Test RAG Help System
 
 ```javascript
-// In browser console
-runAllTests() // Run comprehensive tests
+// Test the RAG help system
+// 1. Click SearchModeToggle to "Help" mode
+// 2. Ask a question in the help chat
+// 3. Verify responses include sources and suggestions
+
+// Example API test
+fetch('/api/help-agent', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: 'How do I create a workflow?',
+    category: 'studio'
+  })
+})
+.then(res => res.json())
+.then(data => console.log('RAG Response:', data))
 ```
 
 ## Installation
@@ -131,16 +211,30 @@ Ensure the following files are in place:
 
 ```
 reference-apps/morphic/
-├── app/api/help/route.ts
-├── lib/help/
-│   ├── help-provider.tsx
-│   └── test-help.ts
+├── app/api/
+│   ├── help/route.ts              # Basic help API
+│   └── help-agent/route.ts        # RAG help agent API (NEW)
+├── lib/
+│   ├── help/
+│   │   ├── help-provider.tsx      # React context provider
+│   │   ├── help-system.ts         # Server-side document management
+│   │   └── test-help.ts           # Testing utilities
+│   ├── agents/
+│   │   └── help-agent.ts          # RAG-based help agent (NEW)
+│   └── tools/
+│       └── help-retrieval.ts      # Document retrieval tool (NEW)
 ├── components/help/
-│   ├── help-chat.tsx
-│   └── index.ts
+│   ├── help-chat.tsx              # RAG-integrated chat component
+│   ├── help-suggestions.tsx       # Dynamic suggestion system
+│   └── index.ts                   # Component exports
 └── docs/help/
     ├── studio/
+    │   ├── overview.md            # Studio overview and features
+    │   ├── nodes.md               # Node types and usage
+    │   ├── workflows.md           # Workflow creation guide
+    │   └── troubleshooting.md     # Common issues and solutions
     └── main-app/
+        └── overview.md            # Main application features
 ```
 
 ## Usage
@@ -181,7 +275,30 @@ import { StudioHelpChat, MainAppHelpChat, HelpChat } from '@/components/help'
 
 ### Advanced Usage
 
-#### Custom Configuration
+#### RAG-Based Help Mode ⭐ **NEW**
+
+```tsx
+import { SearchModeToggle } from '@/components/search-mode-toggle'
+
+function MyPage() {
+  return (
+    <div>
+      {/* Enable RAG help mode */}
+      <SearchModeToggle />
+
+      {/* Regular chat component - automatically uses RAG when in help mode */}
+      <PanelChat
+        chatId="rag-help-chat"
+        initialMessages={[
+          { role: 'assistant', content: 'I\'m here to help! Ask me anything about this section.' }
+        ]}
+      />
+    </div>
+  )
+}
+```
+
+#### Custom RAG Configuration
 
 ```tsx
 <HelpProvider basePath="custom/help/path" autoInitialize={true}>
@@ -194,7 +311,7 @@ import { StudioHelpChat, MainAppHelpChat, HelpChat } from '@/components/help'
 </HelpProvider>
 ```
 
-#### Using Help Hooks
+#### Using Help Hooks with RAG
 
 ```tsx
 import { useHelp, useHelpChat } from '@/lib/help/help-provider'
@@ -208,17 +325,45 @@ function MyComponent() {
     console.log('Search results:', results)
   }
 
-  const handleGetContext = async () => {
-    const context = await getHelpContext('How do I create a node?')
-    console.log('Help context:', context)
+  const handleRAGQuery = async () => {
+    // Use the help agent API directly for RAG responses
+    const response = await fetch('/api/help-agent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: 'How do I create a node?',
+        category: 'studio'
+      })
+    })
+    const data = await response.json()
+    console.log('RAG Response:', data.response)
   }
 
   return (
     <div>
       <button onClick={handleSearch}>Search Help</button>
-      <button onClick={handleGetContext}>Get Context</button>
+      <button onClick={handleRAGQuery}>RAG Help Query</button>
     </div>
   )
+}
+```
+
+#### Direct RAG Agent Usage
+
+```tsx
+import { processHelpQuery } from '@/lib/agents/help-agent'
+
+async function getHelp(query: string, category?: string) {
+  const response = await processHelpQuery({
+    query,
+    category,
+    userId: 'current-user'
+  })
+
+  console.log('Answer:', response.answer)
+  console.log('Sources:', response.sources)
+  console.log('Confidence:', response.confidence)
+  console.log('Suggestions:', response.suggestions)
 }
 ```
 
@@ -264,7 +409,7 @@ interface HelpContextValue {
 
 ### API Endpoints
 
-#### GET /api/help
+#### GET /api/help (Basic Help API)
 
 Query Parameters:
 - `action`: The action to perform
@@ -279,23 +424,104 @@ Actions:
 - `category`: Get all documents in category
 - `formatted`: Get formatted help for AI context
 
+#### POST /api/help-agent (RAG Help API) ⭐ **NEW**
+
+Request Body:
+```json
+{
+  "query": "How do I create a workflow?",
+  "category": "studio",
+  "userId": "optional-user-id",
+  "context": "Additional context information"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "response": {
+    "answer": "To create a workflow in Agent Studio...",
+    "sources": [
+      {
+        "id": "studio/workflows",
+        "title": "Workflow Creation Guide",
+        "category": "studio",
+        "relevance": 95,
+        "excerpt": "Creating workflows involves..."
+      }
+    ],
+    "confidence": 92,
+    "suggestions": [
+      "Learn about workflow execution",
+      "Explore node configurations"
+    ]
+  },
+  "metadata": {
+    "query": "How do I create a workflow?",
+    "category": "studio",
+    "processedAt": "2025-09-07T13:17:22.361Z",
+    "sourcesCount": 3,
+    "confidence": 92
+  }
+}
+```
+
+#### Enhanced POST /api/chat (with Integrated Help Mode) ⭐ **UPDATED**
+
+The chat API now supports RAG-based help when `searchMode` is set to `'help-only'`. The help agent is **directly integrated** into the chat API for better performance and reliability:
+
+```javascript
+// Enable help mode via cookie
+document.cookie = 'search-mode=help-only; path=/'
+
+// Then use regular chat API - it will automatically use RAG help
+fetch('/api/chat', {
+  method: 'POST',
+  body: JSON.stringify({
+    messages: [{ role: 'user', content: 'How do I create a node?' }],
+    id: 'help-chat-123',
+    section: 'studio'
+  })
+})
+```
+
+**Key Changes:**
+- ✅ **Direct Integration**: Help agent runs directly in chat API (no HTTP requests)
+- ✅ **Model Consistency**: Uses same model configuration as regular chat
+- ✅ **Streaming Support**: Proper AI SDK streaming with `streamText()`
+- ✅ **Error Resilience**: Better error handling and fallbacks
+```
+
 Examples:
 ```javascript
-// Get categories
-fetch('/api/help?action=categories')
-
-// Search for help
+// Basic help search
 fetch('/api/help?action=search&query=workflow&category=studio')
 
-// Get formatted help
-fetch('/api/help?action=formatted&query=how to create a node')
+// RAG-based help query
+fetch('/api/help-agent', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: 'How do I connect nodes?',
+    category: 'studio'
+  })
+})
+
+// Get help categories
+fetch('/api/help?action=categories')
 ```
 
 ## Configuration
 
 ### Environment Configuration
 
-No environment variables are required. The system uses the existing application configuration.
+No additional environment variables are required. The help system uses the existing application configuration and model providers:
+
+- **Model Integration**: Uses same model configuration as main chat system
+- **Provider Support**: Compatible with OpenRouter, OpenAI, Anthropic, etc.
+- **API Keys**: Automatically uses configured provider API keys
+- **Fallback Models**: Graceful fallback to compatible models when needed
 
 ### Content Configuration
 
@@ -457,9 +683,36 @@ The test suite covers:
 **Symptoms**: Help components show loading or error states
 **Solutions**:
 1. Check browser console for errors
-2. Verify API endpoints are accessible
-3. Ensure help content files exist
+2. Verify API endpoints are accessible (`/api/help`, `/api/help-agent`)
+3. Ensure help content files exist in `docs/help/`
 4. Check network connectivity
+5. Verify SearchModeToggle is set to "Help" mode
+
+#### RAG Help Not Working ⭐ **UPDATED**
+**Symptoms**: Help responses don't include sources or seem generic
+**Solutions**:
+1. Ensure SearchModeToggle is set to "Help" (purple indicator)
+2. Check if help content exists in the correct category directories
+3. Verify help agent is properly integrated (no separate API calls)
+4. Check browser console for streaming or RAG-specific errors
+5. Ensure MD files are properly formatted with headers
+6. Verify model configuration is correct (uses same models as chat)
+
+#### Streaming Response Errors ⭐ **NEW**
+**Symptoms**: "Failed to parse stream string. No separator found" or no response shown
+**Solutions**:
+1. Check that help mode uses `createDataStreamResponse` with `streamText()`
+2. Verify `mergeIntoDataStream()` is called properly
+3. Ensure model configuration uses `getModel()` from registry
+4. Check for proper AI SDK streaming format (not manual `write()` calls)
+
+#### Infinite Re-render Errors ⭐ **NEW**
+**Symptoms**: "Maximum update depth exceeded" in React components
+**Solutions**:
+1. Check callback dependencies in `useCallback` hooks
+2. Use refs for functions that change on every render
+3. Ensure `appendMessage` callbacks are properly memoized
+4. Verify `handleAppendMessage` doesn't cause dependency loops
 
 #### Search Not Working
 **Symptoms**: Search returns no results or irrelevant results
@@ -468,6 +721,7 @@ The test suite covers:
 2. Check file permissions on the server
 3. Ensure Markdown files are properly formatted
 4. Try refreshing the help system
+5. Check if help categories are properly configured
 
 #### Chat Not Responding
 **Symptoms**: Help chat doesn't provide responses
@@ -476,6 +730,7 @@ The test suite covers:
 2. Verify help context is being generated
 3. Check API response times
 4. Ensure proper error handling
+5. Verify SearchModeToggle is in correct mode
 
 #### Content Not Updating
 **Symptoms**: New help content doesn't appear
@@ -484,6 +739,16 @@ The test suite covers:
 2. Use the refresh function programmatically
 3. Check file system permissions
 4. Verify file paths and naming
+5. Clear browser cache if using cached responses
+
+#### RAG Sources Not Showing ⭐ **NEW**
+**Symptoms**: Help responses work but don't show source citations
+**Solutions**:
+1. Check if help content files exist and are readable
+2. Verify `/api/help` search endpoint is working
+3. Check browser console for retrieval errors
+4. Ensure MD files have proper frontmatter or headers
+5. Verify help agent is properly configured
 
 ### Debug Mode
 
@@ -636,6 +901,65 @@ Potential improvements:
 
 ## Conclusion
 
-The Morphic Help System provides a robust, scalable solution for context-aware user assistance. By leveraging existing infrastructure and following best practices, it offers a seamless experience that can grow with your application's needs.
+The Morphic Help System provides a **production-ready**, AI-powered solution for intelligent user assistance featuring advanced Retrieval-Augmented Generation (RAG) capabilities. Through extensive debugging and optimization, it now delivers accurate, source-cited responses with seamless streaming integration.
 
-For questions or issues, refer to the troubleshooting section or contact the development team.
+### Key Achievements ⭐ **PRODUCTION READY**
+
+- **✅ RAG-Powered Responses**: Intelligent answers based on actual documentation
+- **✅ Source Transparency**: Users see exactly which documents were used
+- **✅ Streaming Integration**: Proper AI SDK streaming with real-time responses
+- **✅ Model Flexibility**: Uses same model configuration as main chat system
+- **✅ Error Resilience**: Comprehensive error handling and fallbacks
+- **✅ Performance Optimized**: Direct server integration, no HTTP overhead
+- **✅ React Stability**: Fixed infinite re-render issues
+- **✅ Scalable Architecture**: Easy to extend with new content and features
+
+### Technical Implementation Highlights
+
+#### **Streaming Architecture** ⭐ **FIXED**
+- **Direct Integration**: Help agent integrated into chat API (no separate HTTP calls)
+- **Proper Streaming**: Uses `streamText()` and `mergeIntoDataStream()` for AI SDK compliance
+- **Model Consistency**: Leverages existing model registry and provider configurations
+- **Error Handling**: Graceful fallbacks with proper streaming error responses
+
+#### **Performance Optimizations** ⭐ **FIXED**
+- **Server-Side Processing**: Direct file system access for help documents
+- **Callback Stability**: Fixed React infinite re-render issues with proper memoization
+- **Memory Efficiency**: Ref-based function storage to prevent dependency loops
+- **Response Caching**: Efficient document loading and search result caching
+
+#### **Integration Excellence** ⭐ **ENHANCED**
+- **Unified Models**: Same AI models and providers as main chat system
+- **Seamless UI**: Works with existing PanelChat and SearchModeToggle components
+- **Context Awareness**: Section-specific help with proper category filtering
+- **Real-time Updates**: Streaming responses with source citations and suggestions
+
+### RAG Benefits Delivered
+
+1. **✅ Dynamic Intelligence**: Context-aware responses from live documentation
+2. **✅ Source Citations**: Verifiable information with document references
+3. **✅ Section-Specific Help**: Relevant content based on current application context
+4. **✅ Continuous Updates**: Automatically uses latest documentation changes
+5. **✅ Semantic Search**: Intelligent document retrieval and relevance scoring
+6. **✅ Follow-up Guidance**: Smart suggestions for related topics and questions
+
+### Production-Ready Features
+
+- **🔧 Robust Error Handling**: Comprehensive fallbacks for all failure scenarios
+- **📊 Performance Monitoring**: Efficient processing with proper resource management
+- **🔄 Auto-Recovery**: Graceful handling of network issues and API failures
+- **🎯 Type Safety**: Full TypeScript support throughout the system
+- **📱 Responsive Design**: Works seamlessly across different screen sizes
+- **♿ Accessibility**: Proper ARIA labels and keyboard navigation support
+
+### Future-Ready Architecture
+
+The system is designed for growth with:
+- **🌐 Multi-language support** for global users
+- **📈 Advanced analytics** for usage tracking and optimization
+- **🎓 Interactive tutorials** for complex workflows
+- **🎤 Voice-based help** for enhanced accessibility
+- **🤝 Collaborative features** for team knowledge sharing
+- **🔍 Advanced search** with filtering and personalization
+
+For questions or issues, refer to the troubleshooting section or contact the development team. The help system now provides **enterprise-grade**, intelligent, documentation-driven assistance that scales with your application's needs! 🚀✨

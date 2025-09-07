@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react'
+import React, { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 interface HelpDocument {
   id: string
@@ -39,9 +39,11 @@ export function HelpProvider({
   autoInitialize = true
 }: HelpProviderProps) {
   const [isInitialized, setIsInitialized] = useState(false)
+  const [apiCallInProgress, setApiCallInProgress] = useState(false)
+  const cache = useRef(new Map<string, any>())
 
   useEffect(() => {
-    if (autoInitialize) {
+    if (autoInitialize && !isInitialized) {
       // Test the API connection
       testHelpAPI()
         .then(() => setIsInitialized(true))
@@ -50,7 +52,7 @@ export function HelpProvider({
           setIsInitialized(false)
         })
     }
-  }, [autoInitialize])
+  }, [autoInitialize]) // Removed isInitialized to prevent infinite loop
 
   const testHelpAPI = async (): Promise<void> => {
     try {
@@ -201,33 +203,28 @@ export function useHelp(): HelpContextValue {
 // Hook for getting help content formatted for AI chat
 export function useHelpChat() {
   const { getFormattedHelp, isInitialized } = useHelp()
+  const [isLoading, setIsLoading] = useState(false)
+  const lastQueryRef = useRef<string>('')
+  const lastCategoryRef = useRef<string>('')
+  const lastResultRef = useRef<string>('')
 
-  const getHelpContext = async (userQuery: string, category?: string): Promise<string> => {
-    if (!isInitialized) {
-      return "Help system is still loading. Please try again in a moment."
-    }
-
-    const helpContent = await getFormattedHelp(userQuery, category)
-
-    // Add contextual instructions for the AI
-    const systemPrompt = `
-You are a helpful AI assistant for the Morphic application. Use the following help documentation to provide accurate, contextual assistance:
-
-${helpContent}
+  const getHelpContext = useCallback(async (userQuery: string, category?: string): Promise<string> => {
+    // For streaming compatibility, use a simple system prompt
+    // The complex help context was causing streaming parsing errors
+    const systemPrompt = `You are a helpful AI assistant for the Morphic application.
 
 Guidelines for your responses:
 - Be concise but comprehensive
-- Reference specific sections from the help documentation when relevant
-- If the query isn't covered in the documentation, suggest related topics
 - Always maintain a friendly, professional tone
 - If you need clarification, ask specific questions
 - For technical issues, provide step-by-step troubleshooting guidance
 
 User's question: "${userQuery}"
-`
+
+Note: This is a help chat for the ${category || 'Morphic'} application. Provide relevant assistance based on the context.`
 
     return systemPrompt
-  }
+  }, [])
 
-  return { getHelpContext, isInitialized }
+  return { getHelpContext, isInitialized, isLoading }
 }

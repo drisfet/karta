@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Message } from 'ai/react'
 
@@ -8,6 +8,8 @@ import { useHelpChat } from '@/lib/help/help-provider'
 import { Model } from '@/lib/types/models'
 
 import { PanelChat } from '../panel-chat/panel-chat'
+
+import { HelpSuggestions } from './help-suggestions'
 
 interface HelpChatProps {
   chatId: string
@@ -28,46 +30,45 @@ export function HelpChat({
   placeholder = "Ask me anything about this section...",
   initialQuery
 }: HelpChatProps) {
-  const { getHelpContext, isInitialized } = useHelpChat()
+  const { getHelpContext, isInitialized, isLoading } = useHelpChat()
   const [initialMessages, setInitialMessages] = useState<Message[]>([])
   const [isLoadingHelp, setIsLoadingHelp] = useState(false)
+  const [lastMessageTime, setLastMessageTime] = useState<number>(0)
+  const [showSuggestions, setShowSuggestions] = useState(true)
+  const [appendFunction, setAppendFunction] = useState<((message: { role: 'user'; content: string }) => void) | null>(null)
+  const [messageCount, setMessageCount] = useState(0)
+  const hasInitializedRef = useRef(false)
 
-  // Prepare initial help context when component mounts or category changes
+  // Prepare initial help context - only once on mount
   useEffect(() => {
-    const prepareHelpContext = async () => {
-      if (!isInitialized) return
+    // Prevent infinite loops by using a ref to track initialization
+    if (hasInitializedRef.current || initialMessages.length > 0) return
 
+    // Only proceed if help system is initialized
+    if (!isInitialized) return
+
+    hasInitializedRef.current = true
+
+    const prepareHelpContext = async () => {
       setIsLoadingHelp(true)
 
       try {
-        let helpQuery = initialQuery || "How can I get started with this section?"
-        const helpContext = await getHelpContext(helpQuery, category)
-
-        // Create initial system message with help context
-        const systemMessage: Message = {
-          id: 'help-system-context',
-          role: 'system',
-          content: helpContext,
+        // Create a simple welcome message
+        const welcomeMessage: Message = {
+          id: 'help-welcome',
+          role: 'assistant',
+          content: `Welcome to the help system! I'm here to assist you with questions about the ${category || 'Morphic'} application. What would you like to know?`,
           createdAt: new Date()
         }
 
-        // Create initial user message if specified
-        const userMessage: Message = {
-          id: 'help-initial-query',
-          role: 'user',
-          content: helpQuery,
-          createdAt: new Date()
-        }
-
-        setInitialMessages([systemMessage, userMessage])
+        setInitialMessages([welcomeMessage])
       } catch (error) {
         console.error('Failed to prepare help context:', error)
 
-        // Fallback to basic help message
         const fallbackMessage: Message = {
           id: 'help-fallback',
           role: 'assistant',
-          content: `I'm here to help you with questions about this section. The help system is currently loading. Please try again in a moment, or ask me a specific question about what you're trying to do.`,
+          content: `I'm here to help you with questions about this section. Please ask me a specific question.`,
           createdAt: new Date()
         }
 
@@ -77,28 +78,58 @@ export function HelpChat({
       }
     }
 
-    prepareHelpContext()
-  }, [isInitialized, category, initialQuery, getHelpContext])
+    // Add a small delay to ensure component is fully mounted
+    const timeoutId = setTimeout(() => {
+      prepareHelpContext()
+    }, 100)
 
-  // Handle message sent to potentially update help context
+    return () => clearTimeout(timeoutId)
+  }, []) // Empty dependency array - only run once on mount
+
+  // Handle message sent - this is called by PanelChat after AI response
   const handleMessageSent = async (message: string) => {
-    if (!isInitialized) return
+    // Hide suggestions once user starts chatting
+    setShowSuggestions(false)
 
-    try {
-      // Get updated help context based on the user's message
-      const updatedContext = await getHelpContext(message, category)
+    // For RAG-based help, we don't need to pre-load context
+    // The help agent handles retrieval dynamically for each query
+    if (!isInitialized || message.length < 3) return
 
-      // This context can be used to enhance future responses
-      // The actual chat will handle the conversation flow
-      console.log('Updated help context for:', message)
-    } catch (error) {
-      console.error('Failed to update help context:', error)
-    }
+    // Optional: Could implement follow-up context caching here
+    // But for now, each query is handled independently by the RAG system
   }
+
+  // Handle suggestion click - use the append function to send message directly
+  const handleSuggestionClick = useCallback((message: string) => {
+    // Hide suggestions immediately
+    setShowSuggestions(false)
+
+    // Use the append function if available
+    if (appendFunction) {
+      appendFunction({
+        role: 'user',
+        content: message
+      })
+    }
+  }, [appendFunction])
+
+  // Handle message count changes to show/hide suggestions
+  const handleMessageCountChange = useCallback((count: number) => {
+    setMessageCount(count)
+    // Hide suggestions if there are any messages
+    if (count > 0) {
+      setShowSuggestions(false)
+    }
+  }, [])
+
+  // Memoize the appendMessage callback to prevent infinite re-renders
+  const handleAppendMessage = useCallback((appendFn: (message: { role: 'user'; content: string }) => void) => {
+    setAppendFunction(() => appendFn)
+  }, [])
 
   // Custom placeholder based on loading state
   const getPlaceholder = () => {
-    if (isLoadingHelp) {
+    if (isLoadingHelp || isLoading) {
       return "Loading help system..."
     }
     if (!isInitialized) {
@@ -108,33 +139,50 @@ export function HelpChat({
   }
 
   return (
-    <div className={`help-chat ${className}`}>
-      <PanelChat
-        chatId={`${chatId}-help`}
-        models={models}
-        initialMessages={initialMessages}
-        placeholder={getPlaceholder()}
-        className="help-chat-panel"
-        onMessageSent={handleMessageSent}
-        compactMode={compactMode}
-      />
-
+    <div className={`help-chat h-full flex flex-col ${className}`}>
       {/* Loading indicator */}
       {isLoadingHelp && (
-        <div className="help-loading-indicator">
-          <div className="flex items-center justify-center p-2 text-sm text-muted-foreground">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-            Preparing help context...
-          </div>
+        <div className="flex items-center justify-center p-4 text-sm text-muted-foreground flex-shrink-0">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+          Preparing help context...
         </div>
       )}
 
       {/* Help system status */}
       {!isInitialized && !isLoadingHelp && (
-        <div className="help-status-indicator">
-          <div className="flex items-center justify-center p-2 text-sm text-muted-foreground">
-            <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-            Help system initializing...
+        <div className="flex items-center justify-center p-4 text-sm text-muted-foreground flex-shrink-0">
+          <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+          Help system initializing...
+        </div>
+      )}
+
+      {/* Chat Interface */}
+      {isInitialized && (
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Show suggestions when no messages and suggestions enabled */}
+          {showSuggestions && messageCount === 0 && isInitialized && !isLoadingHelp && (
+            <div className="flex-shrink-0">
+              <HelpSuggestions
+                category={category || 'studio'}
+                onSuggestionClick={handleSuggestionClick}
+              />
+            </div>
+          )}
+
+          {/* Chat messages and input */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <PanelChat
+              chatId={`${chatId}-help`}
+              models={models}
+              initialMessages={initialMessages}
+              placeholder={getPlaceholder()}
+              className="flex-1 min-h-0"
+              onMessageSent={handleMessageSent}
+              compactMode={compactMode}
+              appendMessage={handleAppendMessage}
+              onMessageCountChange={handleMessageCountChange}
+              section={category}
+            />
           </div>
         </div>
       )}
