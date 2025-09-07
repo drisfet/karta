@@ -1,0 +1,52 @@
+{
+  "models": [
+    {
+      "id": "z-ai/glm-4.5-air:free",
+      "name": "GLM-4.5 Air (Free)",
+      "provider": "OpenRouter",
+      "providerId": "openai-compatible",
+      "enabled": true,
+      "toolCallType": "manual"
+    },
+    {
+      "id": "deepseek/deepseek-chat-v3.1:free",
+      "name": "DeepSeek V3.1 (Free)",
+      "provider": "OpenRouter",
+      "providerId": "openai-compatible",
+      "enabled": true,
+      "toolCallType": "native"
+    },
+    {
+      "id": "microsoft/wizardlm-2-8x22b",
+      "name": "WizardLM-2 8x22B",
+      "provider": "OpenRouter",
+      "providerId": "openai-compatible",
+      "enabled": true,
+      "toolCallType": "native"
+    },
+    {
+      "id": "anthropic/claude-3.5-sonnet",
+      "name": "Claude 3.5 Sonnet",
+      "provider": "OpenRouter",
+      "providerId": "openai-compatible",
+      "enabled": true,
+      "toolCallType": "native"
+    },
+    {
+      "id": "openai/gpt-4o-mini",
+      "name": "GPT-4o Mini",
+      "provider": "OpenRouter",
+      "providerId": "openai-compatible",
+      "enabled": true,
+      "toolCallType": "native"
+    },
+    {
+      "id": "gemini-2.0-flash",
+      "name": "Gemini 2.0 Flash",
+      "provider": "Google Generative AI",
+      "providerId": "google",
+      "enabled": true,
+      "toolCallType": "manual"
+    }
+  ]
+}
