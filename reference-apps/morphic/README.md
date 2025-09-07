@@ -9,6 +9,7 @@ An AI-powered search engine with a generative UI.
 - 🛠 [Features](#-features)
 - 🧱 [Stack](#-stack)
 - 🚀 [Quickstart](#-quickstart)
+- ❓ [Help System](#-help-system)
 - 🌐 [Deploy](#-deploy)
 - 🔎 [Search Engine](#-search-engine)
 - 💙 [Sponsors](#-sponsors)
@@ -69,6 +70,8 @@ Models are configured in `public/config/models.json`. Each model requires its co
 
 ### Additional Features
 
+- **Agent Studio**: Visual workflow editor for AI agent orchestration
+- **Context-Aware Help System**: Intelligent help chat with markdown-based documentation
 - Docker deployment ready
 - Browser search engine integration
 
@@ -152,6 +155,70 @@ docker compose up -d
 ```
 
 Visit http://localhost:3000 in your browser.
+
+## ❓ Help System
+
+Morphic includes a comprehensive, context-aware help system that provides intelligent assistance throughout the application.
+
+### Features
+
+- **Context-Aware Help**: Provides relevant help based on your current location in the app
+- **Markdown-Based Content**: Easy-to-maintain help documentation
+- **Intelligent Search**: Relevance-based search across all help documents
+- **Modular Components**: Reusable help components that can be integrated anywhere
+- **Real-time Responses**: Streaming help responses using the existing chat infrastructure
+
+### Accessing Help
+
+#### Agent Studio Help
+- Navigate to `/studio`
+- Click the purple ❓ **Help** button in the floating toolbar
+- Ask questions about workflows, nodes, or troubleshooting
+
+#### General Help
+```tsx
+import { HelpProvider, StudioHelpChat } from '@/lib/help/help-provider'
+
+<HelpProvider>
+  <StudioHelpChat chatId="my-help" />
+</HelpProvider>
+```
+
+### Help Content Structure
+
+Help content is organized in the `docs/help/` directory:
+
+```
+docs/help/
+├── studio/           # Agent Studio specific help
+│   ├── overview.md   # General studio introduction
+│   ├── nodes.md      # Node types and usage
+│   ├── workflows.md  # Workflow creation
+│   └── troubleshooting.md
+└── main-app/         # Main application help
+    ├── overview.md   # App features
+    └── chat.md       # Chat system usage
+```
+
+### Adding Help Content
+
+1. Create a new Markdown file in the appropriate category directory
+2. Follow the existing format with clear headings and examples
+3. The system automatically discovers and indexes new content
+
+### API Access
+
+The help system provides RESTful API endpoints:
+
+```javascript
+// Search help documents
+fetch('/api/help?action=search&query=workflow&category=studio')
+
+// Get formatted help for AI context
+fetch('/api/help?action=formatted&query=how to create a node')
+```
+
+For complete documentation, see [HELP_SYSTEM.md](./docs/HELP_SYSTEM.md)
 
 ## 🌐 Deploy
 
