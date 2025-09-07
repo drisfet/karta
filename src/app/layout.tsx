@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { ChatModelProvider } from "@/hooks/use-chat-model";
 
 export const metadata: Metadata = {
   title: 'Aussie Insights',
@@ -21,7 +22,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        {children}
+        <ChatModelProvider>
+          {children}
+        </ChatModelProvider>
         <Toaster />
       </body>
     </html>

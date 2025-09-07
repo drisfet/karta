@@ -17,7 +17,7 @@ export function QueryBar({ onQuery }: QueryBarProps) {
     const [isFocused, setIsFocused] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleFormSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (query.trim()) {
             onQuery(query.trim());
@@ -48,11 +48,11 @@ export function QueryBar({ onQuery }: QueryBarProps) {
                 "transition-all duration-300",
                 isFocused ? 'p-4' : 'p-0'
             )}>
-                <form onSubmit={handleSubmit} className="relative flex items-center w-full">
+                <form onSubmit={handleFormSubmit} className="relative flex items-center w-full">
                     <QueryModeDropdown />
-                    
+
                     <div className="relative flex-grow">
-                        <QueryInput 
+                        <QueryInput
                             query={query}
                             onQueryChange={setQuery}
                             isFocused={isFocused}
@@ -70,7 +70,8 @@ export function QueryBar({ onQuery }: QueryBarProps) {
                     </div>
                 </form>
 
-                <div 
+
+                <div
                     className={cn(
                         "transition-all duration-300 ease-in-out overflow-hidden",
                         isFocused ? "max-h-40 opacity-100 pt-4" : "max-h-0 opacity-0"

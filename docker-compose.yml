@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  supabase:
+    image: supabase/postgres:15.1.0.147
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./supabase/migrations:/docker-entrypoint-initdb.d/migrations
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  agent-api:
+    build: ./agent-api
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - SUPABASE_URL=http://supabase:54322
+      - SUPABASE_ANON_KEY=your-anon-key
+      - TAVILY_API_KEY=your-tavily-key
+      - OPENAI_API_KEY=your-openai-key
+      - GOOGLE_API_KEY=your-google-key
+      - OPENROUTER_API_KEY=your-openrouter-key
+    depends_on:
+      supabase:
+        condition: service_healthy
+
+  playworker:
+    build: ./playworker
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+
+  frontend:
+    build: ./src
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+    depends_on:
+      - agent-api
