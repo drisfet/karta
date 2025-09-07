@@ -44,3 +44,8 @@ next-env.d.ts
 firebase-debug.log
 firestore-debug.log
 node_modules
+
+# node_modules in reference apps
+reference-apps/langchain-nextjs-template/node_modules
+reference-apps/morphic/node_modules
+reference-apps/morphic/agent-api/node_modules
